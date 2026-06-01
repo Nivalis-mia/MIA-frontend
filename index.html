@@ -1,32 +1,523 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+<!DOCTYPE html>
 
-app = FastAPI()
+<html lang="fr">
 
-# Autoriser ton site GitHub Pages à appeler ton API
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # tu peux mettre ton domaine GitHub Pages si tu veux
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+<head>
 
-# Modèle pour recevoir les messages
-class ChatRequest(BaseModel):
-    role: str
-    content: str
+<meta charset="UTF-8" />
 
-@app.get("/")
-def home():
-    return {"message": "Bienvenue sur l'API MIA 🚀"}
+<title>MIA – Chat</title>
 
-# Route attendue par ton interface
-@app.post("/chat/{user_id}")
-async def chat(user_id: str, request: ChatRequest):
-    # Réponse simple pour tester
-    return {
-        "role": "mia",
-        "content": f"Hello {user_id} 👋 Je reçois bien ton message : {request.content}"
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+
+font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+background: radial-gradient(circle at top, #1f2937, #020617);
+
+color: #e5e7eb;
+
+height: 100vh;
+
+display: flex;
+
+justify-content: center;
+
+align-items: center;
+
+}
+
+.app {
+
+width: 100%;
+
+max-width: 900px;
+
+height: 90vh;
+
+background: rgba(15, 23, 42, 0.95);
+
+border-radius: 18px;
+
+box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+
+display: flex;
+
+flex-direction: column;
+
+overflow: hidden;
+
+border: 1px solid rgba(148, 163, 184, 0.3);
+
+}
+
+.header {
+
+padding: 14px 20px;
+
+border-bottom: 1px solid rgba(51, 65, 85, 0.9);
+
+display: flex;
+
+align-items: center;
+
+gap: 10px;
+
+background: linear-gradient(to right, #020617, #111827);
+
+}
+
+.avatar {
+
+width: 34px;
+
+height: 34px;
+
+border-radius: 999px;
+
+background: radial-gradient(circle at 30% 20%, #f97316, #ec4899, #6366f1);
+
+display: flex;
+
+align-items: center;
+
+justify-content: center;
+
+font-weight: 700;
+
+font-size: 18px;
+
+color: white;
+
+}
+
+.header-text {
+
+display: flex;
+
+flex-direction: column;
+
+}
+
+.header-title {
+
+font-size: 15px;
+
+font-weight: 600;
+
+}
+
+.header-sub {
+
+font-size: 12px;
+
+color: #9ca3af;
+
+}
+
+.status-dot {
+
+width: 8px;
+
+height: 8px;
+
+border-radius: 999px;
+
+background: #22c55e;
+
+box-shadow: 0 0 10px #22c55e;
+
+margin-right: 4px;
+
+}
+
+
+
+.messages {
+
+flex: 1;
+
+padding: 16px 18px;
+
+overflow-y: auto;
+
+display: flex;
+
+flex-direction: column;
+
+gap: 10px;
+
+scroll-behavior: smooth;
+
+}
+
+.bubble-row {
+
+display: flex;
+
+gap: 8px;
+
+align-items: flex-end;
+
+}
+
+.bubble-row.user {
+
+justify-content: flex-end;
+
+}
+
+.bubble {
+
+max-width: 70%;
+
+padding: 10px 12px;
+
+border-radius: 14px;
+
+font-size: 14px;
+
+line-height: 1.4;
+
+white-space: pre-wrap;
+
+}
+
+.bubble.user {
+
+background: #4f46e5;
+
+color: white;
+
+border-bottom-right-radius: 4px;
+
+}
+
+.bubble.mia {
+
+background: #020617;
+
+border: 1px solid #1f2937;
+
+border-bottom-left-radius: 4px;
+
+}
+
+.bubble-meta {
+
+font-size: 11px;
+
+color: #6b7280;
+
+margin-top: 2px;
+
+}
+
+
+
+.input-area {
+
+border-top: 1px solid rgba(51, 65, 85, 0.9);
+
+padding: 10px 12px;
+
+background: #020617;
+
+display: flex;
+
+gap: 8px;
+
+align-items: center;
+
+}
+
+.input-area textarea {
+
+flex: 1;
+
+resize: none;
+
+border-radius: 12px;
+
+border: 1px solid #374151;
+
+background: #020617;
+
+color: #e5e7eb;
+
+padding: 8px 10px;
+
+font-size: 14px;
+
+max-height: 120px;
+
+}
+
+.input-area textarea:focus {
+
+outline: none;
+
+border-color: #6366f1;
+
+box-shadow: 0 0 0 1px #6366f1;
+
+}
+
+.send-btn {
+
+border: none;
+
+border-radius: 999px;
+
+padding: 9px 14px;
+
+background: linear-gradient(to right, #6366f1, #ec4899);
+
+color: white;
+
+font-weight: 600;
+
+font-size: 13px;
+
+cursor: pointer;
+
+display: flex;
+
+align-items: center;
+
+gap: 6px;
+
+}
+
+.send-btn:disabled {
+
+opacity: 0.5;
+
+cursor: default;
+
+}
+
+.hint {
+
+font-size: 11px;
+
+color: #6b7280;
+
+padding: 0 4px 4px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="header">
+
+<div class="avatar">M</div>
+
+<div class="header-text">
+
+<div class="header-title">MIA – Chat narratif & éducatif</div>
+
+<div class="header-sub">
+
+<span class="status-dot"></span>
+
+En ligne • API perso
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div id="messages" class="messages"></div>
+
+
+
+<div class="hint">Astuce : Shift+Entrée pour aller à la ligne, Entrée pour envoyer.</div>
+
+
+
+<div class="input-area">
+
+<textarea id="input" rows="1" placeholder="Écris à MIA..."></textarea>
+
+<button id="send" class="send-btn">
+
+Envoyer
+
+<span>➤</span>
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+// 🔧 À ADAPTER : URL de ton API
+
+const API_BASE = "https://mia-project-2.onrender.com"; // change en ton URL si besoin
+
+const USER_ID = "celia";
+
+
+
+const messagesEl = document.getElementById("messages");
+
+const inputEl = document.getElementById("input");
+
+const sendBtn = document.getElementById("send");
+
+
+
+function addMessage(role, content) {
+
+const row = document.createElement("div");
+
+row.className = "bubble-row " + (role === "user" ? "user" : "mia");
+
+
+
+const bubble = document.createElement("div");
+
+bubble.className = "bubble " + (role === "user" ? "user" : "mia");
+
+bubble.textContent = content;
+
+
+
+row.appendChild(bubble);
+
+messagesEl.appendChild(row);
+
+messagesEl.scrollTop = messagesEl.scrollHeight;
+
+}
+
+
+
+async function sendMessage() {
+
+const text = inputEl.value.trim();
+
+if (!text) return;
+
+
+
+addMessage("user", text);
+
+inputEl.value = "";
+
+inputEl.style.height = "auto";
+
+sendBtn.disabled = true;
+
+
+
+try {
+
+const res = await fetch(`${API_BASE}/chat/${USER_ID}`, {
+
+method: "POST",
+
+headers: { "Content-Type": "application/json" },
+
+body: JSON.stringify({
+
+role: "user",
+
+content: text
+
+})
+
+});
+
+
+
+if (!res.ok) {
+
+addMessage("mia", "Oups… erreur côté serveur (" + res.status + ").");
+
+} else {
+
+const data = await res.json();
+
+addMessage("mia", data.content || "(Réponse vide)");
+
+}
+
+} catch (e) {
+
+addMessage("mia", "Impossible de joindre l'API MIA. Vérifie l’URL ou le déploiement.");
+
+} finally {
+
+sendBtn.disabled = false;
+
+inputEl.focus();
+
+}
+
+}
+
+
+
+// Gestion du bouton
+
+sendBtn.addEventListener("click", sendMessage);
+
+
+
+// Entrée pour envoyer, Shift+Entrée pour nouvelle ligne
+
+inputEl.addEventListener("keydown", (e) => {
+
+if (e.key === "Enter" && !e.shiftKey) {
+
+e.preventDefault();
+
+sendMessage();
+
+}
+
+});
+
+
+
+// Auto‑resize du textarea
+
+inputEl.addEventListener("input", () => {
+
+inputEl.style.height = "auto";
+
+inputEl.style.height = inputEl.scrollHeight + "px";
+
+});
+
+
+
+// Message d’accueil
+
+addMessage("mia", "Salut Célia ✨ Je suis MIA. Pose-moi une question, ou demande-moi une histoire…");
+
+</script>
+
+</body>
+
+</html>
